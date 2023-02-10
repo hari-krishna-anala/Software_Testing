@@ -10,5 +10,5 @@ Command Meaning [U|u] Pen up
 [C|c] Print current position of the pen and whether it is up or down and its facing direction 
 [Q|q] Stop the program 
 [I n|i n] Initialize the system: The values of the array floor are zeros and the robot is back to [0, 0], pen up and facing north. n size of the array, an integer greater.
- By default, input of command [M s|m s] and [I n|i n] should follow the format of command 
+By default, input of command [M s|m s] and [I n|i n] should follow the format of command 
 character following by one space and then an integer.
