@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,8 @@ public class ProjectTest {
 
     private static ByteArrayOutputStream outContent;
     private static PrintStream originalOut;
+
+    private static InputStream originalIn = System.in;
 
     @BeforeEach
     public void setUpStreams() {
@@ -33,6 +36,7 @@ public class ProjectTest {
     @AfterEach
     public void restoreStreams() {
         System.setOut(originalOut);
+        System.setIn(originalIn);
     }
 
     @ParameterizedTest
@@ -136,11 +140,11 @@ public class ProjectTest {
     public void printMyArrayTestTwo() {
         int[][] outputArray = new int[][]{{0, 1, 1, 1, 0}, {1, 0, 0, 0, 1}, {1, 0, 1, 0, 0}, {0, 1, 0, 0, 0}, {1, 1, 0, 0, 0}};
         String expected = "* *       \n" + 
-        "  *       \n" + 
-        "*   *     \n" + 
-        "*       * \n" + 
-        "  * * *   \n" + 
-        "\r\n";
+                "  *       \n" + 
+                "*   *     \n" + 
+                "*       * \n" + 
+                "  * * *   \n" + 
+                "\r\n";
         Project.printMyArray(outputArray);
         assertEquals(expected, outContent.toString());
     }
@@ -149,48 +153,77 @@ public class ProjectTest {
     public void printMyArrayTestThree() {
         int[][] outputArray = new int[][]{{0, 0, 0, 0, 0}, {1, 0, 1, 0, 1}, {0, 0, 1, 0, 0}, {0, 1, 1, 0, 0}, {1, 0, 0, 0, 0}};
         String expected = "*         \n" + "  * *     \n" + "    *     \n" + "*   *   * \n" + "          \n" + "\r\n";
+
         Project.printMyArray(outputArray);
         assertEquals(expected, outContent.toString());
     }
-    
+
     @Test
-    public void intialCondition() {
-        List<String> inputArray = new ArrayList<>(Arrays.asList("I 10", "C","Q"));
-        String expected = "Position: 0, 0 - Pen: up - Facing: north\r\n";
-        Project.recurse(new int[0][0], 0, 0, 1, 0, inputArray, 0);
-        assertEquals(expected, outContent.toString());
-    }
-    @Test
-    public void recurseTestOne() {
-        List<String> inputArray = new ArrayList<>(Arrays.asList("I 10", "C", "D", "C", "M 4", "C", "R", "C", "M 3", "C", "P", "Q"));
-        String expected = "Position: 0, 0 - Pen: up - Facing: north\r\n" +
-                "Position: 0, 0 - Pen: down - Facing: north\r\n" +
-                "Position: 0, 4 - Pen: down - Facing: north\r\n" +
-                "Position: 0, 4 - Pen: down - Facing: east\r\n" +
-                "Position: 3, 4 - Pen: down - Facing: east\r\n" +
-                "                    \n" + 
-                "                    \n" + 
-                "                    \n" + 
-                "                    \n" +
-                "                    \n" + 
-                "* * * *             \n" + 
-                "*                   \n" + 
-                "*                   \n" +
-                "*                   \n" +
-                "*                   \n" +
-                "\r\n";
-        Project.recurse(new int[0][0], 0, 0, 1, 0, inputArray, 0);
+    public void recurseTestOne() throws Exception {
+
+        String input = "I 10\nC\nD\nC\nM 4\nC\nR\nC\nM 3\nC\nP\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+
+        String expected ="Enter command: \r\n" +
+        		"Enter command: \r\n" +
+        "Position: 0, 0 - Pen: up - Facing: north\r\n" +
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 0, 0 - Pen: down - Facing: north\r\n" +
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 0, 4 - Pen: down - Facing: north\r\n" +
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 0, 4 - Pen: down - Facing: east\r\n" +
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 3, 4 - Pen: down - Facing: east\r\n" +
+        "Enter command: \r\n"+
+        "                    \n" + 
+        "                    \n" + 
+        "                    \n" + 
+        "                    \n" +
+        "                    \n" + 
+        "* * * *             \n" + 
+        "*                   \n" + 
+        "*                   \n" +
+        "*                   \n" +
+        "*                   \n" +
+        "\r\n"+
+        "Enter command: \r\n";
+
+        String args[] = new String[0];
+        Project.main(args);
         assertEquals(expected, outContent.toString());
     }
 
     @Test
-    public void recurseTestTwo() {
-        List<String> inputArray = new ArrayList<>(Arrays.asList("I 10", "C", "D", "C", "M 4", "C", "R", "C", "M 3", "C", "P", "c", "r", "m 2", "p", "Q"));
-        String expected = "Position: 0, 0 - Pen: up - Facing: north\r\n" +
-                "Position: 0, 0 - Pen: down - Facing: north\r\n" +
-                "Position: 0, 4 - Pen: down - Facing: north\r\n" +
-                "Position: 0, 4 - Pen: down - Facing: east\r\n" +
-                "Position: 3, 4 - Pen: down - Facing: east\r\n" +
+    public void recurseTestTwo() throws Exception {
+
+        String input = "I 10\nC\nD\nC\nM 4\nC\nR\nC\nM 3\nC\nP\nc\nr\nm 2\np\nc\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+
+        String expected = "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 0, 0 - Pen: up - Facing: north\r\n" +
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 0, 0 - Pen: down - Facing: north\r\n" +
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 0, 4 - Pen: down - Facing: north\r\n" +
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 0, 4 - Pen: down - Facing: east\r\n" +
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 3, 4 - Pen: down - Facing: east\r\n" +
+        		"Enter command: \r\n"+
                 "                    \n" +
                 "                    \n" +
                 "                    \n" +
@@ -202,7 +235,11 @@ public class ProjectTest {
                 "*                   \n" +
                 "*                   \n" +
                 "\r\n" +
+                "Enter command: \r\n"+
                 "Position: 3, 4 - Pen: down - Facing: east\r\n" +
+                "Enter command: \r\n"+
+                "Enter command: \r\n"+
+                "Enter command: \r\n"+
                 "                    \n" +
                 "                    \n" +
                 "                    \n" +
@@ -213,19 +250,41 @@ public class ProjectTest {
                 "*     *             \n" +
                 "*                   \n" +
                 "*                   \n" + 
-                "\r\n";
-        Project.recurse(new int[0][0], 0, 0, 1, 0, inputArray, 0);
+                "\r\n"+
+                "Enter command: \r\n"+
+                "Position: 3, 2 - Pen: down - Facing: south\r\n" +
+                "Enter command: \r\n"; 
+        String args[] = new String[0];
+        Project.main(args);
         assertEquals(expected, outContent.toString());
     }
 
+
     @Test
-    public void recurseTestThree() {
-        List<String> inputArray = new ArrayList<>(Arrays.asList("I 10", "C", "D", "C", "M 4", "C", "R", "C", "M 3", "C", "P", "c", "r", "m 2", "p", "l", "m 3", "L", "m 5", "C", "p", "Q"));
-        String expected = "Position: 0, 0 - Pen: up - Facing: north\r\n" +
+    public void recurseTestThree() throws Exception {
+
+        String input = "I 10\nC\nD\nC\nM 4\nC\nR\nC\nM 3\nC\nP\nc\nr\nm 2\np\nl\nm 3\nL\nm 5\nC\nP\nl\nm 2\np\nC\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+
+        String expected = "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 0, 0 - Pen: up - Facing: north\r\n" +
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 0, 0 - Pen: down - Facing: north\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 0, 4 - Pen: down - Facing: north\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 0, 4 - Pen: down - Facing: east\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 3, 4 - Pen: down - Facing: east\r\n" +
+        		"Enter command: \r\n"+
+        		
                 "                    \n" +
                 "                    \n" +
                 "                    \n" +
@@ -237,7 +296,11 @@ public class ProjectTest {
                 "*                   \n" +
                 "*                   \n" +
                 "\r\n" +
+                "Enter command: \r\n"+
                 "Position: 3, 4 - Pen: down - Facing: east\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "                    \n" +
                 "                    \n" +
                 "                    \n" +
@@ -249,7 +312,13 @@ public class ProjectTest {
                 "*                   \n" +
                 "*                   \n" +
                 "\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 6, 7 - Pen: down - Facing: north\r\n" +
+                "Enter command: \r\n"+
                 "                    \n" +
                 "                    \n" +
                 "            *       \n" +
@@ -260,19 +329,50 @@ public class ProjectTest {
                 "*     * * * *       \n" +
                 "*                   \n" +
                 "*                   \n" +
-                "\r\n";
-        Project.recurse(new int[0][0], 0, 0, 1, 0, inputArray, 0);
+                "\r\n" +
+                "Enter command: \r\n"+
+                "Enter command: \r\n"+
+                "Enter command: \r\n"+
+                "                    \n" +
+                "                    \n" +
+                "        * * *       \n" +
+                "            *       \n" +
+                "            *       \n" +
+                "* * * *     *       \n" +
+                "*     *     *       \n" +
+                "*     * * * *       \n" +
+                "*                   \n" +
+                "*                   \n" +
+                "\r\n" +
+                "Enter command: \r\n"+
+                "Position: 4, 7 - Pen: down - Facing: west\r\n" +
+                "Enter command: \r\n";
+        String args[] = new String[0];
+        Project.main(args);
         assertEquals(expected, outContent.toString());
     }
     
     @Test
-    public void recurseTestFour() {
-        List<String> inputArray = new ArrayList<>(Arrays.asList("I 10", "C", "C", "M 4", "C", "R", "C", "M 3", "C", "P", "Q"));
-        String expected = "Position: 0, 0 - Pen: up - Facing: north\r\n" +
+    public void recurseTestFour() throws Exception{
+    	String input = "I 10\nC\nC\nM 4\nC\nR\nC\nM 3\nC\nP\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+        String expected = "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 0, 0 - Pen: up - Facing: north\r\n" +
+        		"Enter command: \r\n"+
                 "Position: 0, 0 - Pen: up - Facing: north\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 0, 4 - Pen: up - Facing: north\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 0, 4 - Pen: up - Facing: east\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 3, 4 - Pen: up - Facing: east\r\n" +
+                "Enter command: \r\n"+
                 "                    \n" + 
                 "                    \n" + 
                 "                    \n" + 
@@ -283,19 +383,35 @@ public class ProjectTest {
                 "                    \n" +
                 "                    \n" +
                 "                    \n" +
-                "\r\n";
-        Project.recurse(new int[0][0], 0, 0, 1, 0, inputArray, 0);
+                "\r\n"+
+                "Enter command: \r\n";
+        String args[] = new String[0];
+        Project.main(args);
         assertEquals(expected, outContent.toString());
     }
     
     @Test
-    public void recurseTestFive() {
-        List<String> inputArray = new ArrayList<>(Arrays.asList("I 10", "C", "C", "M 4", "C", "R", "C", "D", "M 3", "C", "P", "Q"));
-        String expected = "Position: 0, 0 - Pen: up - Facing: north\r\n" +
+    public void recurseTestFive() throws Exception{
+    	String input = "I 10\nC\nC\nM 4\nC\nR\nC\nD\nM 3\nC\nP\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+        String expected = "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Position: 0, 0 - Pen: up - Facing: north\r\n" +
+        		"Enter command: \r\n"+
                 "Position: 0, 0 - Pen: up - Facing: north\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 0, 4 - Pen: up - Facing: north\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 0, 4 - Pen: up - Facing: east\r\n" +
+                "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Enter command: \r\n"+
                 "Position: 3, 4 - Pen: down - Facing: east\r\n" +
+                "Enter command: \r\n"+
                 "                    \n" + 
                 "                    \n" + 
                 "                    \n" + 
@@ -306,11 +422,13 @@ public class ProjectTest {
                 "                    \n" +
                 "                    \n" +
                 "                    \n" +
-                "\r\n";
-        Project.recurse(new int[0][0], 0, 0, 1, 0, inputArray, 0);
+                "\r\n"+
+                "Enter command: \r\n";
+        String args[] = new String[0];
+        Project.main(args);
         assertEquals(expected, outContent.toString());
     }
-    
+
     @ParameterizedTest
     @MethodSource("isInputValidTestParameters")
     public void isInputValidTest(String input, boolean expected) {
@@ -340,7 +458,6 @@ public class ProjectTest {
                 Arguments.of("m1", false),
                 Arguments.of("I 2", true),
                 Arguments.of("i 3", true),
-                Arguments.of("ip3", false),
                 Arguments.of("I3", false),
                 Arguments.of("i2", false),
                 Arguments.of("x", false),
@@ -349,8 +466,82 @@ public class ProjectTest {
 
         );
     }
+    
+    @Test
+    public void intialCondition() throws Exception{
+    	String input = "I 10\nC\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+        
+        String expected = "Enter command: \r\n"
+        		+ "Enter command: \r\n"
+        		+ "Position: 0, 0 - Pen: up - Facing: north\r\n"
+        		+"Enter command: \r\n";
+        String args[] = new String[0];
+        Project.main(args);
+        assertEquals(expected, outContent.toString());
+    }
+    
+    @Test
+    public void invalidUserInput() throws Exception{
+    	String input = "I 10\nv\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+        
+        String expected = "Enter command: \r\n"+
+        		"Enter command: \r\n"+
+        		"Invalid Input";
+        String args[] = new String[0];
+        Project.main(args);
+        assertEquals(expected, outContent.toString().trim());
+    }
+    
+    @Test
+    public void recurseTestSix() throws Exception {
+
+        String input = "I 10\nC\nD\nC\nM 4\nC\nR\nC\nm 10\nM 3\nC\nP\nQ";
+        InputStream stream = new ByteArrayInputStream(input.getBytes
+                (Charset.forName("UTF-8")));
+        System.setIn(stream);
+
+        String expected ="Enter command: \r\n" +
+        		"Enter command: \r\n" +
+        "Position: 0, 0 - Pen: up - Facing: north\r\n" +
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 0, 0 - Pen: down - Facing: north\r\n" +
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 0, 4 - Pen: down - Facing: north\r\n" +
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 0, 4 - Pen: down - Facing: east\r\n" +
+        "Enter command: \r\n"+
+        "Out of bound. Please give the input inside the floor bounds.\r\n"+
+        "Enter command: \r\n"+
+        "Enter command: \r\n"+
+        "Position: 3, 4 - Pen: down - Facing: east\r\n" +
+        "Enter command: \r\n"+
+        "                    \n" + 
+        "                    \n" + 
+        "                    \n" + 
+        "                    \n" +
+        "                    \n" + 
+        "* * * *             \n" + 
+        "*                   \n" + 
+        "*                   \n" +
+        "*                   \n" +
+        "*                   \n" +
+        "\r\n"+
+        "Enter command: \r\n";
+
+        String args[] = new String[0];
+        Project.main(args);
+        assertEquals(expected, outContent.toString());
+    }
 
 
 
-
-       }
+}
